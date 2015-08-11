@@ -46,6 +46,51 @@ abstract class Table extends \ArrayObject
      * @var int
      */
     protected static $_readConsistency;
+
+    /**
+     * @var \Psr\Log\LoggerInterface;
+     */
+    protected static $_profiler;
+
+    public static function getProfiler()
+    {
+        return static::$_profiler;
+    }
+
+    public static function setProfiler(\Psr\Log\LoggerInterface $profiler)
+    {
+        static::$_profiler=$profiler;
+    }
+
+    public static function getKeyspace()
+    {
+        return static::$_keyspace;
+    }
+
+    public static function getColumns()
+    {
+        return static::$_columns;
+    }
+
+    public static function getTableName()
+    {
+        return static::$_name;
+    }
+
+    public static function getPrimary()
+    {
+        return static::$_primary;
+    }
+
+    public static function getReadConsistency()
+    {
+        return static::$_readConsistency;
+    }
+
+    public static function getWriteConsistency()
+    {
+        return static::$_writeConsistency;
+    }
     
     /**
      * 
