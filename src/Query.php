@@ -34,6 +34,9 @@ class Query{
 	 */
 	protected $_options = [];
 
+    protected $_profileStartTime;
+
+
 	/**
 	 * Class constructor
 	 *
@@ -98,6 +101,22 @@ class Query{
 		return $this;
 	}
 
+    protected  function profileStart($info,$options)
+    {
+        if(Table::getProfiler()){
+            $this->_profileStartTime = microtime(true);
+            Table::getProfiler()->info($info,$options);
+        }
+    }
+
+    protected  function profileEnd($info,$options)
+    {
+        if(Table::getProfiler()){
+            $options['duration']= microtime(true)-$this->_profileStartTime;
+            Table::getProfiler()->info($info,$options);
+        }
+    }
+
 
 	/**
 	 * Executes the current query and returns the response
@@ -106,9 +125,13 @@ class Query{
 	 * @return \Cassandra\Response
 	 */
 	public function querySync(){
+        $this->profileStart('querySync:'.$this->assemble(),['bind'=>$this->_bind,'consistency'=>$this->_consistency,'options'=>$this->_options]);
+
 		$adapter = $this->_dbAdapter ?: Table::getDefaultDbAdapter();
-		
-		return $adapter->querySync($this->assemble(), $this->_bind, $this->_consistency, $this->_options);
+
+		$ret = $adapter->querySync($this->assemble(), $this->_bind, $this->_consistency, $this->_options);
+        $this->profileEnd('querySyncEnd:',[]);
+        return $ret;
 	}
 	
 	/**
@@ -117,9 +140,12 @@ class Query{
 	 * @return \Cassandra\Statement
 	 */
 	public function queryAsync(){
+        $this->profileStart('queryAsync:'.$this->assemble(),['bind'=>$this->_bind,'consistency'=>$this->_consistency,'options'=>$this->_options]);
 		$adapter = $this->_dbAdapter ?: Table::getDefaultDbAdapter();
 	
-		return $adapter->queryAsync($this->assemble(), $this->_bind, $this->_consistency, $this->_options);
+		$ret = $adapter->queryAsync($this->assemble(), $this->_bind, $this->_consistency, $this->_options);
+        $this->profileEnd('queryAsyncEnd:',[]);
+        return $ret;
 	}
 
 	/**
@@ -129,9 +155,12 @@ class Query{
 	 * @return \Cassandra\Result
 	 */
 	public function prepare(){
+        $this->profileStart('prepare:'.$this->assemble(),[]);
 		$adapter = $this->_dbAdapter ?: Table::getDefaultDbAdapter();
 	
-		return $adapter->prepare($this->assemble());
+		$ret = $adapter->prepare($this->assemble());
+        $this->profileEnd('prepareEnd:',[]);
+        return $ret;
 	}
 	
 	/**
